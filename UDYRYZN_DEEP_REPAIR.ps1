@@ -9,7 +9,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 # 3. YAPILANDIRMA VE URL AYARLARI
-$CURRENT_VER = "11.0" 
+$CURRENT_VER = "10.0" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -22,34 +22,27 @@ $PAD_TXT  = "        "
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. AKILLI GUNCELLEME VE KENDI UZERINE YAZMA (Self-Overwriting)
-Write-Host "  $Y[*] Guncelleme ajani (Mozilla Identity) ile denetleniyor...$W"
+# 4. GUNCELLEME VE KENDI UZERINE YAZMA MANTIGI (Self-Overwriting)
+Write-Host "  $Y[*] Guncelleme ajani sorgulaniyor...$W"
 try {
-    # Decimal hatasini onlemek icin [string] zorlamasi (Casting) yapildi
     $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5
     $ONLINE_VER = ([string]$RAW_DATA).Trim() 
 
     if ([decimal]$ONLINE_VER -gt [decimal]$CURRENT_VER) {
         Write-Host "  $G[!] Yeni versiyon (v$ONLINE_VER) mevcut.$W"
-        $choice = Read-Host "  Dosya icerigi otomatik yenilensin mi? (E/H)"
+        $choice = Read-Host "  Guncellensin mi? (E/H)"
         if ($choice -eq "E" -or $choice -eq "e") {
-            Write-Host "  $C[*] Yeni kodlar mevcut dosyanin uzerine yaziliyor...$W"
+            Write-Host "  $C[*] Yeni kodlar dosya uzerine yaziliyor...$W"
             Invoke-WebRequest -Uri $URL_SCRIPT -OutFile $PSCommandPath -UserAgent $UA 
-            Write-Host "  $G[+] Basarili! Yeni surum baslatiliyor...$W"
+            Write-Host "  $G[+] Basarili! Yeniden baslatiliyor...$W"
             Start-Process powershell -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$PSCommandPath`""
             exit
         }
-    } else {
-        Write-Host "  $G[+] Sistem guncel. Operasyona geciliyor...$W"
-        Start-Sleep -Seconds 1
     }
-} catch {
-    Write-Host "  $R[-] Baglanti Kurulamadi: $($_.Exception.Message)$W"
-    Start-Sleep -Seconds 2
-}
+} catch { Write-Host "  $R[-] Baglanti Kurulamadi.$W" }
 
 Clear-Host
-# 5. ANA LOGO VE TANITIM KUTUSU (Geri Getirilen Bolum)
+# 5. ANA LOGO VE TANITIM KUTUSU (v8.3 Tasarimi)
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -58,7 +51,6 @@ Write-Host "$C$PAD_LOGO    ██║   ██║██║  ██║  ╚██�
 Write-Host "$C$PAD_LOGO    ╚██████╔╝██████╔╝   ██║   ██║  ██║   ██║   ███████╗██║ ╚████║"
 Write-Host "$C$PAD_LOGO     ╚═════╝ ╚═════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝$W"
 Write-Host ""
-# Istedigin Diff Ekranindaki O Kutucuk
 Write-Host "  $B$PAD_BOX╔══════════════════════════════════════════════════════════════════════════════════╗$W"
 Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W $CURRENT_VER.NET  $B║$W"
 Write-Host "  $B$PAD_BOX╚══════════════════════════════════════════════════════════════════════════════════╝$W"
@@ -68,44 +60,41 @@ Write-Host "  $R$PAD_TXT  [!] LUTFEN PENCEREYI KAPATMAYIN VE ISLEMIN BITMESINI B
 Write-Host ""
 
 # --- OPERASYONLAR ---
-
-# [01] AG SIFIRLAMA
+# [01] NETWORK RESET
 Write-Host "  $P$PAD_TXT[01]$W $C AG KATMANI DERIN SIFIRLAMA$W"
 netsh winsock reset | Out-Null; netsh int ip reset | Out-Null
 ipconfig /release | Out-Null; ipconfig /renew | Out-Null; ipconfig /flushdns | Out-Null
-Write-Host "  $G$PAD_TXT [DONE]$W Ag yigini tamamen sifirlandi."
+Write-Host "  $G$PAD_TXT [DONE]$W"
 
-# [02] SFC ONARIMI
+# [02] SFC SCAN
 Write-Host "  $P$PAD_TXT[02]$W $C SISTEM DOSYASI ONARIMI (SFC)$W"
 sfc /scannow
 
-# [03] DISM (RESTORE + RESETBASE)
+# [03] DISM (Restore + ResetBase)
 Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
 dism /online /cleanup-image /restorehealth
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
-Write-Host "  $G$PAD_TXT [DONE]$W Windows bilesen deposu temizlendi."
+Write-Host "  $G$PAD_TXT [DONE]$W"
 
 # [04] EVENT LOGS
 Write-Host "  $P$PAD_TXT[04]$W $C SISTEM LOGLARI TEMIZLIGI$W"
 Get-WinEvent -ListLog * -ErrorAction SilentlyContinue | ForEach-Object { [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($_.LogName) }
-Write-Host "  $G$PAD_TXT [DONE]$W Olay gunlukleri sifirlandi."
+Write-Host "  $G$PAD_TXT [DONE]$W"
 
-# [05] ICON CACHE REBUILD
+# [05] ICON CACHE
 Write-Host "  $P$PAD_TXT[05]$W $C IKON BELLEGI RESTORASYONU$W"
 Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
 Remove-Item "$env:localappdata\IconCache.db", "$env:localappdata\Microsoft\Windows\Explorer\iconcache_*.db" -Force -ErrorAction SilentlyContinue
 Start-Process explorer
-Write-Host "  $G$PAD_TXT [DONE]$W Windows Gezgini ve ikon bellegi yenilendi."
+Write-Host "  $G$PAD_TXT [DONE]$W"
 
-# [06] USB AUTOPLAY AKTIVASYONU
+# [06] USB AUTOPLAY
 Write-Host "  $P$PAD_TXT[06]$W $C USB VE MEDYA AUTOPLAY AKTIVASYONU$W"
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "DisableAutoplay" -Value 0 -Force
-Write-Host "  $G$PAD_TXT [DONE]$W USB suruculeri artik otomatik acilacak."
+Write-Host "  $G$PAD_TXT [DONE]$W"
 
-# KAPANIS
 Write-Host ""
 Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
-Write-Host ""
 Read-Host "Kapatmak icin Enter'a basiniz..."
