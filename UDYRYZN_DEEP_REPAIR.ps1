@@ -9,7 +9,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 # 3. YAPILANDIRMA VE URL AYARLARI
-$CURRENT_VER = "10.0" 
+$CURRENT_VER = "11.0" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -98,3 +98,4 @@ Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Read-Host "Kapatmak icin Enter'a basiniz..."
+
