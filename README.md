@@ -1,10 +1,7 @@
 **UDYRYZN DEEP REPAIR ENGINE v11.0 🚀**
-Windows sistem hatalarını onarmak, ağ katmanlarını sıfırlamak ve gereksiz sistem yüklerini temizlemek için tasarlanmış, PowerShell tabanlı profesyonel bir bakım otomasyonudur. Orijinal v8.3 .bat mimarisinin modern GitHub entegrasyonu ve akıllı güncelleme ajanı ile güçlendirilmiş halidir.
-
+Windows sistem hatalarını onarmak, ağ katmanlarını sıfırlamak ve gereksiz sistem yüklerini temizlemek için tasarlanmış, PowerShell tabanlı profesyonel bir bakım otomasyonudur.
 
 **🛠 Temel Özellikler**
-Sistem, mekatronik disipliniyle 6 ana operasyonel katman üzerinde çalışır:
-
 [01] Ağ Katmanı Sıfırlama: Winsock, IP yığını sıfırlama ve DNS temizliği (FlushDNS).
 
 [02] SFC Onarımı: Windows sistem çekirdeği bütünlük taraması.
@@ -20,7 +17,7 @@ Sistem, mekatronik disipliniyle 6 ana operasyonel katman üzerinde çalışır:
 
 **🚀 Kurulum ve Çalıştırma**
 1. Dosyayı İndirin
-UDYRYZN_DEEP_REPAIR.ps1 dosyasını bilgisayarınıza indirin.
+**UDYRYZN_DEEP_REPAIR.ps1** dosyasını bilgisayarınıza indirin.
 
 2. Yönetici Olarak Çalıştırın
 Dosyaya Sağ Tıklayın ve "PowerShell ile Çalıştır" (Run with PowerShell) seçeneğini seçin. Yazılım, yönetici izni yoksa otomatik olarak izin isteyecektir.
