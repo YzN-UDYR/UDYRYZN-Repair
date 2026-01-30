@@ -9,8 +9,8 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. YAPILANDIRMA (Kritik: version.txt ile AYNI olmali!)
-$CURRENT_VER = "11.0" 
+# 3. YAPILANDIRMA
+$CURRENT_VER = "11.1" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -23,10 +23,9 @@ $PAD_TXT  = "        "
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. GUNCELLEME DENETIMI (Bypass Warning & Encoding Fix)
+# 4. GUNCELLEME DENETIMI
 Write-Host "  $Y[*] Versiyon kontrolü yapılıyor...$W"
 try {
-    # -UseBasicParsing uyarilari engeller
     $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
     $ONLINE_VER = ([string]$RAW_DATA).Trim() 
 
@@ -34,22 +33,16 @@ try {
         Write-Host "  $G[!] YENI SURUM MEVCUT: v$ONLINE_VER$W"
         $choice = Read-Host "  Otomatik güncellensin mi? (E/H)"
         if ($choice -eq "E" -or $choice -eq "e") {
-            Write-Host "  $C[*] Yeni kodlar guvenli modda indiriliyor...$W"
-            # Indirirken karakterleri bozmamasi icin binary olarak alip UTF8 kaydediyoruz
             $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
             [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
-            
-            Write-Host "  $G[+] Güncelleme tamamlandı. Lütfen pencereyi kapatıp tekrar açın.$W"
+            Write-Host "  $G[+] Güncelleme tamamlandı. Lütfen tekrar açın.$W"
             Pause; exit
         }
-    } else {
-        Write-Host "  $G[+] Yazılım güncel (v$CURRENT_VER). Operasyon başlıyor...$W"
-        Start-Sleep -Seconds 1
     }
-} catch { Write-Host "  $R[-] Bağlantı kurulamadı, çevrimdışı devam ediliyor...$W" }
+} catch { Write-Host "  $R[-] Güncelleme sunucusuna ulaşılamadı.$W" }
 
 Clear-Host
-# 5. ANA LOGO VE TANITIM KUTUSU (v8.3 Bat Mirası)
+# 5. ANA LOGO (v8.3 Bat Mirası)
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -64,26 +57,48 @@ Write-Host "  $B$PAD_BOX╚═════════════════�
 Write-Host ""
 
 # --- OPERASYONLAR ---
+
 # [01] NETWORK RESET
-Write-Host "  $P$PAD_TXT[01]$W $C AĞ SIFIRLAMA...$W"
-netsh winsock reset | Out-Null; netsh int ip reset | Out-Null
-ipconfig /flushdns | Out-Null
-Write-Host "  $G$PAD_TXT [DONE]$W"
+Write-Host "  $P$PAD_TXT[01]$W $C AG SIFIRLAMA...$W"
+try {
+    netsh winsock reset | Out-Null; netsh int ip reset | Out-Null; ipconfig /flushdns | Out-Null
+    Write-Host "  $G$PAD_TXT [DONE]$W"
+} catch { Write-Host "  $R$PAD_TXT [FAIL] Ag ayarlarina erisim engellendi.$W" }
 
 # [02] SFC SCAN
 Write-Host "  $P$PAD_TXT[02]$W $C SISTEM ONARIMI (SFC)...$W"
 sfc /scannow
 
-# [03] DISM (RESTORE + RESETBASE)
-Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
+# [03] DISM
+Write-Host "  $P$PAD_TXT[03]$W $C DISM ONARIMI...$W"
 dism /online /cleanup-image /restorehealth
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
 Write-Host "  $G$PAD_TXT [DONE]$W"
 
-# [04] EVENT LOGS
-Write-Host "  $P$PAD_TXT[04]$W $C LOG TEMİZLİĞİ...$W"
-Get-WinEvent -ListLog * -ErrorAction SilentlyContinue | ForEach-Object { [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($_.LogName) }
+# [04] EVENT LOGS (Hata Korumalı)
+Write-Host "  $P$PAD_TXT[04]$W $C SISTEM LOGLARI TEMIZLIGI$W"
+$Logs = Get-WinEvent -ListLog * -ErrorAction SilentlyContinue
+foreach ($Log in $Logs) {
+    try { [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($Log.LogName) }
+    catch { continue } # Kilitli olanları sessizce atlar
+}
 Write-Host "  $G$PAD_TXT [DONE]$W"
+
+# [05] ICON CACHE (Hata Korumalı)
+Write-Host "  $P$PAD_TXT[05]$W $C IKON BELLEGI RESTORASYONU$W"
+try {
+    Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+    Remove-Item "$env:localappdata\IconCache.db", "$env:localappdata\Microsoft\Windows\Explorer\iconcache_*.db" -Force -ErrorAction SilentlyContinue
+    Start-Process explorer
+    Write-Host "  $G$PAD_TXT [DONE]$W"
+} catch { Write-Host "  $R$PAD_TXT [FAIL] Ikon dosyalarina ulasilamadi.$W"; Start-Process explorer }
+
+# [06] USB AUTOPLAY (Hata Korumalı)
+Write-Host "  $P$PAD_TXT[06]$W $C USB AUTOPLAY AKTIVASYONU$W"
+try {
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "DisableAutoplay" -Value 0 -Force
+    Write-Host "  $G$PAD_TXT [DONE]$W"
+} catch { Write-Host "  $R$PAD_TXT [FAIL] Kayit defteri izni reddedildi.$W" }
 
 # KAPANIS
 Write-Host ""
