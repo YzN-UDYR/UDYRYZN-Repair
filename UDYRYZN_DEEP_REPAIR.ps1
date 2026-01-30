@@ -4,37 +4,61 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-# 2. KARAKTER KODLAMA VE PROTOKOL
+# 2. KARAKTER KODLAMA VE PROTOKOL (Otomatik Mühürleme Aktif)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. HIZALAMA AYARLARI
-$CURRENT_VER = "11.5" 
-$PAD_LOGO = "                      "
-$PAD_BOX  = "        "
-$PAD_TXT  = "        "
-$PAD_SUB  = "               " # 15 Karakterlik Mühendislik Boşluğu
+# 3. YAPILANDIRMA VE HIZALAMA (Mühendislik Simetrisi)
+$CURRENT_VER = "11.6" 
+$URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
+$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
+$PAD_LOGO = "                      "
+$PAD_BOX  = "        "
+$PAD_TXT  = "        "
+$PAD_SUB  = "               " # 15 Karakter: Operasyon başlığının tam altı.
+
+# 4. DIŞ KOMUTLARI HİZALAMA FONKSİYONU (Dikey Kirliliği Önleyen Motor)
+function Invoke-Aligned {
+    param([string]$Cmd, [string]$Args)
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $Cmd
+    $psi.Arguments = $Args
+    $psi.RedirectStandardOutput = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+    $p = [System.Diagnostics.Process]::Start($psi)
+    while (!$p.StandardOutput.EndOfStream) {
+        $line = $p.StandardOutput.ReadLine()
+        if ($line.Trim()) {
+            # `r ile satır başına döner, boşluğu basar ve metni yazar.
+            # Böylece % verileri alt alta binmez, aynı noktada güncellenir.
+            Write-Host -NoNewline "`r$PAD_SUB$line"
+        }
+    }
+    $p.WaitForExit()
+    Write-Host "" # İşlem bitince yeni satıra geç.
+}
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. GÜNCELLEME SİSTEMİ (Auto-BOM Mühürlü)
+# 5. GÜNCELLEME SİSTEMİ (Auto-BOM Mühürlü)
 try {
-    $RAW_DATA = Invoke-RestMethod -Uri "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt" -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
+    $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
     if ([decimal]($RAW_DATA.Trim()) -gt [decimal]$CURRENT_VER) {
-        $newCode = (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1" -UserAgent $UA -UseBasicParsing).Content
+        $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
         [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
         Write-Host "  $G[+] Güncelleme tamamlandı. Lütfen tekrar açın.$W"; Pause; exit
     }
 } catch { }
 
 Clear-Host
-# 5. ANA LOGO (v8.3 Mirası) [cite: 4, 5, 6]
+# 6. ANA LOGO (v8.3 Mirası)
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -46,39 +70,32 @@ Write-Host ""
 Write-Host "  $B$PAD_BOX╔══════════════════════════════════════════════════════════════════════════════════╗$W"
 Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W $CURRENT_VER.NET  $B║$W"
 Write-Host "  $B$PAD_BOX╚══════════════════════════════════════════════════════════════════════════════════╝$W"
-Write-Host ""
 
-# --- OPERASYONLAR ---
+# --- OPERASYONLAR (v8.3 BAT EKSİKSİZ TAM LİSTE) ---
 
-# [01] NETWORK RESET [cite: 9]
+# [01] NETWORK RESET [cite: 8, 9]
 Write-Host "  $P$PAD_TXT[01]$W $C AG SIFIRLAMA...$W"
 try {
-    netsh winsock reset | Out-Null; netsh int ip reset | Out-Null; ipconfig /flushdns | Out-Null
-    Write-Host "$PAD_SUB $G[DONE]$W"
+    netsh winsock reset | Out-Null; netsh int ip reset | Out-Null; ipconfig /release | Out-Null; ipconfig /renew | Out-Null; ipconfig /flushdns | Out-Null
+    Write-Host "$PAD_SUB $G[DONE]$W Ag yığını sıfırlandı."
 } catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
 Write-Host ""
 
-# [02] SFC SCAN (Aynı Satırda Güncelleme) [cite: 11]
+# [02] SFC SCAN (Gelişmiş Hizalama) [cite: 11]
 Write-Host "  $P$PAD_TXT[02]$W $C SISTEM ONARIMI (SFC)$W"
-$sfc = Start-Process sfc -ArgumentList "/scannow" -NoNewWindow -PassThru -Wait
-# Not: SFC çıktısı çekirdek seviyesinde olduğu için % karakterini 'r' ile yakalayıp aynı satırda tutuyoruz.
-Write-Host "$PAD_SUB $G[DONE]$W Sistem taraması bitti."
+Invoke-Aligned "sfc" "/scannow"
+Write-Host "$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [03] DISM (Hizalanmış ve Temiz) [cite: 13]
+# [03] DISM (Gelişmiş Hizalama) [cite: 13]
 Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
-Write-Host "$PAD_SUB Onarım operasyonu başlatılıyor..."
-dism /online /cleanup-image /restorehealth | ForEach-Object {
-    if ($_ -match "(\d+\.\d+%)") {
-        Write-Host -NoNewline "`r$PAD_SUB Ilerleme: $matches[1]"
-    }
-}
-Write-Host "" # Yeni satıra geç
+Invoke-Aligned "dism" "/online /cleanup-image /restorehealth"
+Write-Host "$PAD_SUB Bilesen deposu temizleniyor (ResetBase)..."
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
-Write-Host "$PAD_SUB $G[DONE]$W Bilesen deposu temizlendi."
+Write-Host "$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [04] EVENT LOGS (Smart Feedback) [cite: 14]
+# [04] EVENT LOGS [cite: 14]
 Write-Host "  $P$PAD_TXT[04]$W $C SISTEM LOGLARI TEMIZLIGI$W"
 $Logs = Get-WinEvent -ListLog * -ErrorAction SilentlyContinue
 $s = 0; $k = 0
@@ -113,4 +130,3 @@ Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Read-Host "Kapatmak için Enter'a basınız..."
-
