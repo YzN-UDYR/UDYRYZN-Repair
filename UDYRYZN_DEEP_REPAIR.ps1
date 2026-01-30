@@ -4,11 +4,11 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-# 2. Güvenlik ve Bağlantı Protokolleri (GitHub Erişimi İçin Şart)
+# 2. Güvenlik ve Bağlantı Yapılandırması
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # 3. Güncelleme Yapılandırması
-$CURRENT_VER = "11.0" 
+$CURRENT_VER = "11.0" # Test için 10.0 kalsın, GitHub'da 11.0 olduğu için güncelleyecektir.
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -21,28 +21,39 @@ $PAD_TXT  = "        "
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 
-# 5. Güncelleme Denetimi (GitHub Reddetmemesi İçin User-Agent Eklendi)
+# 5. Güncelleme Denetimi
 Clear-Host
 Write-Host "  $Y[*] Sunucuya baglaniliyor...$W"
 try {
-    # GitHub'ın kimliksiz istekleri reddetmesini engellemek için User-Agent başlığı kullanılır
+    # GitHub bağlantısı için User-Agent kullanımı
     $response = Invoke-WebRequest -Uri $URL_VERSION -UseBasicParsing -TimeoutSec 5 -Headers @{"User-Agent"="Mozilla/5.0"}
     $ONLINE_VER = $response.Content.Trim()
 
     if ([decimal]$ONLINE_VER -gt [decimal]$CURRENT_VER) {
         Write-Host "  $G[!] YENI SURUM MEVCUT: v$ONLINE_VER$W"
-        $choice = Read-Host "  Guncel surumu masaustune indirmek istiyor musunuz? (E/H)"
+        $choice = Read-Host "  Yazilim otomatik olarak guncellensin mi? (E/H)"
         if ($choice -eq "E" -or $choice -eq "e") {
-            Invoke-WebRequest -Uri $URL_SCRIPT -OutFile "$env:USERPROFILE\Desktop\UDYRYZN_DEEP_REPAIR_v$ONLINE_VER.ps1"
-            Write-Host "  $G[+] Guncel dosya masaustune indirildi. Eski dosyayi silebilirsiniz.$W"
-            Pause; exit
+            Write-Host "  $Y[*] Yeni surum indiriliyor ve mevcut dosya guncelleniyor...$W"
+            
+            # Yeni kodu internetten çek
+            $NewCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UseBasicParsing -Headers @{"User-Agent"="Mozilla/5.0"}).Content
+            
+            # Mevcut çalışan dosyanın ($PSCommandPath) içeriğini yeni kodla değiştir
+            Set-Content -Path $PSCommandPath -Value $NewCode -Force
+            
+            Write-Host "  $G[+] Guncelleme basarili! Yeni surum baslatiliyor...$W"
+            Start-Sleep -Seconds 1
+            
+            # Yeni sürümü ayrı bir işlem olarak başlat ve eskiyi kapat
+            Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+            exit
         }
     } else {
         Write-Host "  $G[+] Yazilim guncel (v$CURRENT_VER).$W"
         Start-Sleep -Seconds 1
     }
 } catch {
-    Write-Host "  $R[-] Sunucuya baglanilamadi. Cevrimdisi mod aktif.$W"
+    Write-Host "  $R[-] Sunucuya baglanilamadi. Hata: $($_.Exception.Message)$W"
     Start-Sleep -Seconds 1
 }
 
