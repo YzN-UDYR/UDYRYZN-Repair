@@ -1,12 +1,21 @@
+
+
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
+# Güvenlik protokolünü zorla (En başa ekle)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# Düzeltilmiş Linkler
+$CURRENT_VER = "11.0"
+$URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
+$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
 # --- GUNCELLEME YAPILANDIRMASI (GERCEK LİNKLER) ---
-$CURRENT_VER = "11.0"
-$URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/version.txt"
-$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/UDYRYZN_DEEP_REPAIR.ps1"
+#$CURRENT_VER = "10.0"
+#$URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/version.txt"
+#$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/UDYRYZN_DEEP_REPAIR.ps1"
 
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
@@ -14,7 +23,7 @@ $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
 
-$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v11"
+$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v10"
 Clear-Host
 
 # 1. Guncelleme Denetimi
@@ -74,5 +83,3 @@ Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
 Read-Host "Kapatmak icin Enter'a basiniz..."
-
-
