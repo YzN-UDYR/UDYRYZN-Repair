@@ -4,14 +4,14 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-# 2. KARAKTER KODLAMA VE PROTOKOL (Otomatik Mühürleme Aktif)
+# 2. KARAKTER VE PROTOKOL SABİTLEME
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. YAPILANDIRMA VE HIZALAMA (Mühendislik Simetrisi)
-$CURRENT_VER = "11.6" 
+# 3. YAPILANDIRMA (v11.5 Precision)
+$CURRENT_VER = "11.7" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -20,42 +20,58 @@ $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0
 $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
-$PAD_SUB  = "               " # 15 Karakter: Operasyon başlığının tam altı.
+$PAD_SUB  = "               " # 15 Karakter: 'S' harfinin tam altı.
 
-# 4. DIŞ KOMUTLARI HİZALAMA FONKSİYONU (Dikey Kirliliği Önleyen Motor)
-function Invoke-Aligned {
+# 4. HİZALAMA VE DİNAMİK SATIR MOTORU
+function Invoke-Precision {
     param([string]$Cmd, [string]$Args)
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $Cmd
-    $psi.Arguments = $Args
-    $psi.RedirectStandardOutput = $true
-    $psi.UseShellExecute = $false
-    $psi.CreateNoWindow = $true
-    $p = [System.Diagnostics.Process]::Start($psi)
-    while (!$p.StandardOutput.EndOfStream) {
-        $line = $p.StandardOutput.ReadLine()
-        if ($line.Trim()) {
-            # `r ile satır başına döner, boşluğu basar ve metni yazar.
-            # Böylece % verileri alt alta binmez, aynı noktada güncellenir.
-            Write-Host -NoNewline "`r$PAD_SUB$line"
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo.FileName = $Cmd
+    $process.StartInfo.Arguments = $Args
+    $process.StartInfo.RedirectStandardOutput = $true
+    $process.StartInfo.UseShellExecute = $false
+    $process.StartInfo.CreateNoWindow = $true
+    [void]$process.Start()
+    
+    while (!$process.StandardOutput.EndOfStream) {
+        $line = $process.StandardOutput.ReadLine()
+        if ($line -match "\d+[%]") {
+            # Yüzde içeren satırları aynı noktada günceller (Vertical Spam Önleyici)
+            Write-Host -NoNewline "`r$PAD_SUB$($line.Trim())"
+        } elseif ($line.Trim()) {
+            Write-Host "$PAD_SUB$($line.Trim())"
         }
     }
-    $p.WaitForExit()
-    Write-Host "" # İşlem bitince yeni satıra geç.
+    $process.WaitForExit()
+    Write-Host "" 
 }
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 5. GÜNCELLEME SİSTEMİ (Auto-BOM Mühürlü)
-try {
-    $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
-    if ([decimal]($RAW_DATA.Trim()) -gt [decimal]$CURRENT_VER) {
-        $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
-        [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
-        Write-Host "  $G[+] Güncelleme tamamlandı. Lütfen tekrar açın.$W"; Pause; exit
+# 5. AKILLI GÜNCELLEME KONTROLÜ (2 Saniye Deneme)
+Write-Host "  $Y[*] Güncelleme sunucusuna bağlanılıyor (2sn)...$W"
+$updateTask = Start-Job -ScriptBlock {
+    param($u, $v, $ua)
+    try { 
+        $data = Invoke-RestMethod -Uri $u -UserAgent $ua -TimeoutSec 2 -UseBasicParsing
+        return $data.Trim()
+    } catch { return $null }
+} -ArgumentList $URL_VERSION, $CURRENT_VER, $UA
+
+if (Wait-Job $updateTask -Timeout 2) {
+    $ONLINE_VER = Receive-Job $updateTask
+    if ($ONLINE_VER -and [decimal]$ONLINE_VER -gt [decimal]$CURRENT_VER) {
+        Write-Host "  $G[!] YENİ SÜRÜM TESPİT EDİLDİ: v$ONLINE_VER$W"
+        $choice = Read-Host "  Otomatik güncellensin mi? (E/H)"
+        if ($choice -eq "E" -or $choice -eq "e") {
+            $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
+            [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
+            Write-Host "  $G[+] Güncellendi. Lütfen tekrar açın.$W"; Pause; exit
+        }
     }
-} catch { }
+}
+Remove-Job $updateTask -Force
 
 Clear-Host
 # 6. ANA LOGO (v8.3 Mirası)
@@ -73,29 +89,29 @@ Write-Host "  $B$PAD_BOX╚═════════════════�
 
 # --- OPERASYONLAR (v8.3 BAT EKSİKSİZ TAM LİSTE) ---
 
-# [01] NETWORK RESET [cite: 8, 9]
+# [01] NETWORK RESET
 Write-Host "  $P$PAD_TXT[01]$W $C AG SIFIRLAMA...$W"
 try {
     netsh winsock reset | Out-Null; netsh int ip reset | Out-Null; ipconfig /release | Out-Null; ipconfig /renew | Out-Null; ipconfig /flushdns | Out-Null
-    Write-Host "$PAD_SUB $G[DONE]$W Ag yığını sıfırlandı."
+    Write-Host "$PAD_SUB $G[DONE]$W Ag yapilandirmasi sifirlandi."
 } catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
 Write-Host ""
 
-# [02] SFC SCAN (Gelişmiş Hizalama) [cite: 11]
+# [02] SFC SCAN (Precision Motor)
 Write-Host "  $P$PAD_TXT[02]$W $C SISTEM ONARIMI (SFC)$W"
-Invoke-Aligned "sfc" "/scannow"
-Write-Host "$PAD_SUB $G[DONE]$W"
+Invoke-Precision "sfc" "/scannow"
+Write-Host "$PAD_SUB $G[DONE]$W Tarama bitti."
 Write-Host ""
 
-# [03] DISM (Gelişmiş Hizalama) [cite: 13]
+# [03] DISM (Precision Motor)
 Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
-Invoke-Aligned "dism" "/online /cleanup-image /restorehealth"
+Invoke-Precision "dism" "/online /cleanup-image /restorehealth"
 Write-Host "$PAD_SUB Bilesen deposu temizleniyor (ResetBase)..."
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
 Write-Host "$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [04] EVENT LOGS [cite: 14]
+# [04] EVENT LOGS
 Write-Host "  $P$PAD_TXT[04]$W $C SISTEM LOGLARI TEMIZLIGI$W"
 $Logs = Get-WinEvent -ListLog * -ErrorAction SilentlyContinue
 $s = 0; $k = 0
@@ -106,7 +122,7 @@ foreach ($Log in $Logs) {
 Write-Host "$PAD_SUB $Y[STATUS]$W ($s basarili, $k kilitli gunluk atlandi)"
 Write-Host ""
 
-# [05] ICON CACHE [cite: 15]
+# [05] ICON CACHE
 Write-Host "  $P$PAD_TXT[05]$W $C IKON BELLEGI RESTORASYONU$W"
 try {
     Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
@@ -117,14 +133,14 @@ try {
 } catch { Start-Process explorer }
 Write-Host ""
 
-# [06] USB AUTOPLAY [cite: 16]
+# [06] USB AUTOPLAY
 Write-Host "  $P$PAD_TXT[06]$W $C USB AUTOPLAY AKTIVASYONU$W"
 try {
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "DisableAutoplay" -Value 0 -Force
     Write-Host "$PAD_SUB $G[DONE]$W"
 } catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
 
-# KAPANIŞ [cite: 18]
+# KAPANIŞ
 Write-Host ""
 Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
