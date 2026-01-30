@@ -11,7 +11,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 # 3. HIZALAMA AYARLARI
-$CURRENT_VER = "11.4" 
+$CURRENT_VER = "11.5" 
 $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
@@ -113,3 +113,4 @@ Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Read-Host "Kapatmak için Enter'a basınız..."
+
