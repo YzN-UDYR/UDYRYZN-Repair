@@ -1,32 +1,26 @@
-
-
+# 1. Yönetici İzni Kontrolü
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
-# Güvenlik protokolünü zorla (En başa ekle)
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Düzeltilmiş Linkler
+# 2. Güvenlik Protokolü ve Güncelleme Yapılandırması
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $CURRENT_VER = "11.0"
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
-# --- GUNCELLEME YAPILANDIRMASI (GERCEK LİNKLER) ---
-#$CURRENT_VER = "10.0"
-#$URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/version.txt"
-#$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/UDYRYZN_DEEP_REPAIR.ps1"
-
+# 3. Görsel Değişkenler
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
 $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
 
-$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v10"
+$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 1. Guncelleme Denetimi
+# 4. Güncelleme Denetimi
 Write-Host "  $Y[*] Sunucuya baglaniliyor...$W"
 try {
     $ONLINE_VER = (Invoke-RestMethod -Uri $URL_VERSION -TimeoutSec 5).Trim()
@@ -48,7 +42,7 @@ try {
 }
 
 Clear-Host
-# 2. Ana Arayuz
+# 5. Ana Arayüz (ASCII Art)
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -58,11 +52,11 @@ Write-Host "$C$PAD_LOGO    ╚██████╔╝██████╔╝  
 Write-Host "$C$PAD_LOGO     ╚═════╝ ╚═════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝$W"
 Write-Host ""
 Write-Host "  $B$PAD_BOX╔══════════════════════════════════════════════════════════════════════════════════╗$W"
-Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W 11.0.NET $B║$W"
+Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W $CURRENT_VER.NET $B║$W"
 Write-Host "  $B$PAD_BOX╚══════════════════════════════════════════════════════════════════════════════════╝$W"
 Write-Host ""
 
-# --- OPERASYONLAR ---
+# 6. Operasyonlar
 Write-Host "  $P$PAD_TXT[01]$W $C AG SIFIRLAMA$W"
 netsh winsock reset | Out-Null
 netsh int ip reset | Out-Null
