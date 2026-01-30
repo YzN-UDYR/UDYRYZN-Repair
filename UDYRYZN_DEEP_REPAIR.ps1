@@ -4,13 +4,15 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
-# 2. Güvenlik Protokolü ve Güncelleme Yapılandırması
+# 2. Güvenlik ve Bağlantı Protokolleri (GitHub Erişimi İçin Şart)
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$CURRENT_VER = "11.0"
+
+# 3. Güncelleme Yapılandırması
+$CURRENT_VER = "11.0" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
-# 3. Görsel Değişkenler
+# 4. Tasarım Değişkenleri
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
 $PAD_LOGO = "                      "
@@ -18,12 +20,15 @@ $PAD_BOX  = "        "
 $PAD_TXT  = "        "
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
-Clear-Host
 
-# 4. Güncelleme Denetimi
+# 5. Güncelleme Denetimi (GitHub Reddetmemesi İçin User-Agent Eklendi)
+Clear-Host
 Write-Host "  $Y[*] Sunucuya baglaniliyor...$W"
 try {
-    $ONLINE_VER = (Invoke-RestMethod -Uri $URL_VERSION -TimeoutSec 5).Trim()
+    # GitHub'ın kimliksiz istekleri reddetmesini engellemek için User-Agent başlığı kullanılır
+    $response = Invoke-WebRequest -Uri $URL_VERSION -UseBasicParsing -TimeoutSec 5 -Headers @{"User-Agent"="Mozilla/5.0"}
+    $ONLINE_VER = $response.Content.Trim()
+
     if ([decimal]$ONLINE_VER -gt [decimal]$CURRENT_VER) {
         Write-Host "  $G[!] YENI SURUM MEVCUT: v$ONLINE_VER$W"
         $choice = Read-Host "  Guncel surumu masaustune indirmek istiyor musunuz? (E/H)"
@@ -41,8 +46,8 @@ try {
     Start-Sleep -Seconds 1
 }
 
+# 6. Ana Arayüz (ASCII Art Logo)
 Clear-Host
-# 5. Ana Arayüz (ASCII Art)
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -56,7 +61,7 @@ Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   
 Write-Host "  $B$PAD_BOX╚══════════════════════════════════════════════════════════════════════════════════╝$W"
 Write-Host ""
 
-# 6. Operasyonlar
+# 7. Operasyonlar
 Write-Host "  $P$PAD_TXT[01]$W $C AG SIFIRLAMA$W"
 netsh winsock reset | Out-Null
 netsh int ip reset | Out-Null
