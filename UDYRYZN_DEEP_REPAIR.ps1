@@ -14,7 +14,7 @@ $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
 
-$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v10"
+$Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v11"
 Clear-Host
 
 # 1. Guncelleme Denetimi
@@ -49,7 +49,7 @@ Write-Host "$C$PAD_LOGO    ╚██████╔╝██████╔╝  
 Write-Host "$C$PAD_LOGO     ╚═════╝ ╚═════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝$W"
 Write-Host ""
 Write-Host "  $B$PAD_BOX╔══════════════════════════════════════════════════════════════════════════════════╗$W"
-Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W 10.0.NET $B║$W"
+Write-Host "  $B$PAD_BOX║$W  $R[MODE]$W : $W Deep Repair Engine$W   $B║$W   $Y[USER]$W : $W $env:USERNAME$W      $B║$W   $Y[VER]$W : $W 11.0.NET $B║$W"
 Write-Host "  $B$PAD_BOX╚══════════════════════════════════════════════════════════════════════════════════╝$W"
 Write-Host ""
 
@@ -74,4 +74,5 @@ Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
 Read-Host "Kapatmak icin Enter'a basiniz..."
+
 
