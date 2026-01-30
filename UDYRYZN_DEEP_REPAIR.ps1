@@ -6,7 +6,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 # --- GUNCELLEME YAPILANDIRMASI (GERCEK LİNKLER) ---
 $CURRENT_VER = "11.0"
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/version.txt"
-$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/UDYRYZN_DEEP_REPAIR_v10.ps1"
+$URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/refs/heads/main/UDYRYZN_DEEP_REPAIR.ps1"
 
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
@@ -74,3 +74,4 @@ Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
 Read-Host "Kapatmak icin Enter'a basiniz..."
+
