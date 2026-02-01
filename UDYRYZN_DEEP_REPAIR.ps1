@@ -10,8 +10,8 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. YAPILANDIRMA (v12.3 Autonomous)
-$CURRENT_VER = "12.3" 
+# 3. YAPILANDIRMA VE HIZALAMA (v12.6 Full Suite)
+$CURRENT_VER = "12.6" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -20,12 +20,12 @@ $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0
 $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
-$PAD_SUB  = "               " # 15 Karakter: 'S' harfinin tam alti.
+$PAD_SUB  = "               " # 15 Karakterlik hassas mühür.
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. OTONOM GUNCELLEME MOTORU (Auto-Restart Aktif)
+# 4. GUNCELLEME MOTORU (Otonom & Sabit Lojik)
 Write-Host "  $Y[*] Guncelleme ajani ve TLS 1.2 hatti denetleniyor...$W"
 try {
     $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
@@ -38,9 +38,8 @@ try {
             Write-Host "  $C[*] Yeni kodlar indiriliyor ve UTF-8 (BOM'lu) mühürleniyor...$W"
             $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
             [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
-            Write-Host "  $G[+] Güncelleme başarılı. Yeni sürüm otonom olarak başlatılıyor...$W"
+            Write-Host "  $G[+] Güncelleme başarılı. Yeni sürüm otonom başlatılıyor...$W"
             Start-Sleep -Seconds 1
-            # KRITIK: Yeni kodu yuklemek icin scripti otomatik yeniden baslatir
             Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
             exit
         }
@@ -48,10 +47,10 @@ try {
         Write-Host "  $G[+] Sistem guncel (v$CURRENT_VER). Operasyon baslatiliyor...$W"
         Start-Sleep -Seconds 1
     }
-} catch { Write-Host "  $R[-] Sunucuya ulasilamadi. Cevrimdisi modda devam ediliyor...$W" }
+} catch { Write-Host "  $R[-] Sunucuya ulasilamadi. Cevrimdisi mod aktif.$W" }
 
 Clear-Host
-# 5. ANA LOGO (Final Design)
+# 5. ANA LOGO
 Write-Host ""
 Write-Host "$C$PAD_LOGO    ██╗   ██╗██████╗ ██╗   ██╗██████╗ ██╗   ██╗███████╗███╗   ██╗"
 Write-Host "$C$PAD_LOGO    ██║   ██║██╔══██╗╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══███╔╝████╗  ██║"
@@ -66,31 +65,34 @@ Write-Host "  $B$PAD_BOX╚═════════════════�
 
 # --- OPERASYONLAR ---
 
-# [01] AG SIFIRLAMA
+# [01] AG KATMANI SIFIRLAMA (Mikro-Raporlama)
 Write-Host "  $P$PAD_TXT[01]$W $C AG KATMANI DERIN SIFIRLAMA$W"
-try {
-    netsh winsock reset | Out-Null; netsh int ip reset | Out-Null; ipconfig /release | Out-Null; ipconfig /renew | Out-Null; ipconfig /flushdns | Out-Null
-    Write-Host "$PAD_SUB $G[DONE]$W"
-} catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
-Write-Host ""
-
-# [02] SFC SCAN (Real-Time Yüzde)
-Write-Host "  $P$PAD_TXT[02]$W $C SISTEM DOSYASI ONARIMI (SFC)$W"
-Write-Host "$PAD_SUB Sistem taraması yapılıyor, lütfen bekleyin..."
-sfc /scannow | ForEach-Object {
-    if ($_ -match "(\d+%)") {
-        Write-Host -NoNewline "`r$PAD_SUB Ilerleme Durumu: $($matches[1])"
-    }
+$netOps = @(
+    @{ cmd = "netsh winsock reset"; txt = "Winsock Protokolü Sifirlama........." },
+    @{ cmd = "netsh int ip reset";  txt = "IP Yapilandirmasi Sifirlama........." },
+    @{ cmd = "ipconfig /release";   txt = "Mevcut IP Adresi Birakma............" },
+    @{ cmd = "ipconfig /renew";     txt = "Yeni IP Adresi Aliniyor............." },
+    @{ cmd = "ipconfig /flushdns";  txt = "DNS Onbelleği Temizleniyor.........." }
+)
+foreach ($op in $netOps) {
+    Write-Host -NoNewline "$PAD_SUB $($op.txt)"
+    try { Invoke-Expression $op.cmd | Out-Null; Write-Host " $G[DONE]$W" } catch { Write-Host " $R[FAIL]$W" }
 }
-Write-Host "`n$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [03] DISM (Real-Time Yüzde & Hashtable Fix)
+# [02] SFC SCAN (Real-Time Telemetri)
+Write-Host "  $P$PAD_TXT[02]$W $C SISTEM DOSYASI ONARIMI (SFC)$W"
+Write-Host "$PAD_SUB Sistem taraması aktif. Lütfen bekleyin..."
+cmd /c "sfc /scannow" | ForEach-Object {
+    if ($_ -match "(\d+%)") { Write-Host -NoNewline "`r$PAD_SUB Ilerleme Durumu: $G$($matches[1])$W" }
+}
+Write-Host "`n$PAD_SUB $G[DONE]$W Sistem taramasi tamamlandi."
+Write-Host ""
+
+# [03] DISM (Hashtable Fix & Dinamik Yuzde)
 Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
 dism /online /cleanup-image /restorehealth | ForEach-Object {
-    if ($_ -match "(\d+\.\d+%)") {
-        Write-Host -NoNewline "`r$PAD_SUB Onarim Durumu: $($matches[1])"
-    }
+    if ($_ -match "(\d+\.\d+%)") { Write-Host -NoNewline "`r$PAD_SUB Onarim Durumu: $G$($matches[1])$W" }
 }
 Write-Host "`n$PAD_SUB Bilesen deposu temizleniyor (ResetBase)..."
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
@@ -124,8 +126,30 @@ try {
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "DisableAutoplay" -Value 0 -Force
     Write-Host "$PAD_SUB $G[DONE]$W"
 } catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
+Write-Host ""
 
-# KAPANIS
+# [07] WINGET (Purple-Yellow Palette)
+Write-Host "  $P$PAD_TXT[07]$W $C SISTEM UYGULAMALARI GUNCELLEME (WINGET)$W"
+if (Get-Command winget -ErrorAction SilentlyContinue) {
+    Write-Host "$PAD_SUB Mevcut guncellemeler denetleniyor..."
+    $updateList = winget upgrade --accept-source-agreements | Out-String
+    if ($updateList -match "No installed package found") {
+        Write-Host "$PAD_SUB $G[DONE]$W Tum uygulamalar zaten guncel."
+    } else {
+        winget upgrade --all --silent --accept-package-agreements --accept-source-agreements | ForEach-Object {
+            $line = $_.Trim()
+            if ($line -match "^([\w\.\-]+)\s+.*$") { $currentApp = $matches[1] }
+            if ($line -match "(\d+%)") {
+                Write-Host -NoNewline "`r$PAD_SUB $P$currentApp$W guncelleniyor... $Y$($matches[1])$W"
+            }
+            elseif ($line -match "Successfully installed") {
+                Write-Host "`n$PAD_SUB $P$currentApp$W %100 $G[DONE]$W"
+            }
+        }
+    }
+} else { Write-Host "$PAD_SUB $R[FAIL]$W Winget bulunamadi." }
+
+# KAPANIS (PAUSE GARANTISI)
 Write-Host ""
 Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                                OPERASYON TAMAMLANDI."
