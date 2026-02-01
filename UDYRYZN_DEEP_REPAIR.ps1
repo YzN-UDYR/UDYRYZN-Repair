@@ -10,7 +10,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. YAPILANDIRMA VE HIZALAMA (v12.6 Full Suite)
+# 3. YAPILANDIRMA (v12.7 Autonomous)
 $CURRENT_VER = "12.6" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
@@ -20,13 +20,13 @@ $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0
 $PAD_LOGO = "                      "
 $PAD_BOX  = "        "
 $PAD_TXT  = "        "
-$PAD_SUB  = "               " # 15 Karakterlik hassas mühür.
+$PAD_SUB  = "               " # 15 Karakter: Tam hizalama noktasi.
 
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. GUNCELLEME MOTORU (Otonom & Sabit Lojik)
-Write-Host "  $Y[*] Guncelleme ajani ve TLS 1.2 hatti denetleniyor...$W"
+# 4. OTONOM GUNCELLEME MOTORU (Senin Sabit Lojigin)
+Write-Host "  $Y[*] Guncelleme ajani denetleniyor...$W"
 try {
     $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
     $ONLINE_VER = ([string]$RAW_DATA).Trim() 
@@ -35,19 +35,15 @@ try {
         Write-Host "  $G[!] YENI SURUM TESPIT EDILDI: v$ONLINE_VER$W"
         $choice = Read-Host "  Otomatik guncellensin mi? (E/H)"
         if ($choice -eq "E" -or $choice -eq "e") {
-            Write-Host "  $C[*] Yeni kodlar indiriliyor ve UTF-8 (BOM'lu) mühürleniyor...$W"
             $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
             [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
-            Write-Host "  $G[+] Güncelleme başarılı. Yeni sürüm otonom başlatılıyor...$W"
+            Write-Host "  $G[+] Guncelleme basarili. Otonom restart yapiliyor...$W"
             Start-Sleep -Seconds 1
             Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
             exit
         }
-    } else {
-        Write-Host "  $G[+] Sistem guncel (v$CURRENT_VER). Operasyon baslatiliyor...$W"
-        Start-Sleep -Seconds 1
     }
-} catch { Write-Host "  $R[-] Sunucuya ulasilamadi. Cevrimdisi mod aktif.$W" }
+} catch { Write-Host "  $R[-] Guncelleme hatti mesgul.$W" }
 
 Clear-Host
 # 5. ANA LOGO
@@ -68,7 +64,7 @@ Write-Host "  $B$PAD_BOX╚═════════════════�
 # [01] AG KATMANI SIFIRLAMA (Mikro-Raporlama)
 Write-Host "  $P$PAD_TXT[01]$W $C AG KATMANI DERIN SIFIRLAMA$W"
 $netOps = @(
-    @{ cmd = "netsh winsock reset"; txt = "Winsock Protokolü Sifirlama........." },
+    @{ cmd = "netsh winsock reset"; txt = "Winsock Protokolu Sifirlama........." },
     @{ cmd = "netsh int ip reset";  txt = "IP Yapilandirmasi Sifirlama........." },
     @{ cmd = "ipconfig /release";   txt = "Mevcut IP Adresi Birakma............" },
     @{ cmd = "ipconfig /renew";     txt = "Yeni IP Adresi Aliniyor............." },
@@ -80,26 +76,30 @@ foreach ($op in $netOps) {
 }
 Write-Host ""
 
-# [02] SFC SCAN (Real-Time Telemetri)
+# [02] SFC SCAN (Real-Time Yüzde)
 Write-Host "  $P$PAD_TXT[02]$W $C SISTEM DOSYASI ONARIMI (SFC)$W"
 Write-Host "$PAD_SUB Sistem taraması aktif. Lütfen bekleyin..."
 cmd /c "sfc /scannow" | ForEach-Object {
-    if ($_ -match "(\d+%)") { Write-Host -NoNewline "`r$PAD_SUB Ilerleme Durumu: $G$($matches[1])$W" }
+    if ($_ -match "(\d+%)") {
+        Write-Host -NoNewline "`r$PAD_SUB SFC Ilerleme Durumu: $G$($matches[1])$W"
+    }
 }
-Write-Host "`n$PAD_SUB $G[DONE]$W Sistem taramasi tamamlandi."
+Write-Host "`n$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [03] DISM (Hashtable Fix & Dinamik Yuzde)
+# [03] DISM (Real-Time Yüzde)
 Write-Host "  $P$PAD_TXT[03]$W $C DISM DERIN ONARIM VE RESETBASE$W"
 dism /online /cleanup-image /restorehealth | ForEach-Object {
-    if ($_ -match "(\d+\.\d+%)") { Write-Host -NoNewline "`r$PAD_SUB Onarim Durumu: $G$($matches[1])$W" }
+    if ($_ -match "(\d+\.\d+%)") {
+        Write-Host -NoNewline "`r$PAD_SUB DISM Onarim Durumu: $G$($matches[1])$W"
+    }
 }
 Write-Host "`n$PAD_SUB Bilesen deposu temizleniyor (ResetBase)..."
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
 Write-Host "$PAD_SUB $G[DONE]$W"
 Write-Host ""
 
-# [04] EVENT LOGS
+# [04] EVENT LOGS (Smart Feedback)
 Write-Host "  $P$PAD_TXT[04]$W $C SISTEM LOGLARI TEMIZLIGI$W"
 $Logs = Get-WinEvent -ListLog * -ErrorAction SilentlyContinue
 $s = 0; $k = 0
@@ -107,7 +107,7 @@ foreach ($Log in $Logs) {
     try { [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($Log.LogName); $s++ }
     catch { $k++ }
 }
-Write-Host "$PAD_SUB $Y[STATUS]$W ($s basarili, $k kilitli gunluk atlandi)"
+Write-Host "$PAD_SUB $Y[STATUS]$W ($s basarili, $k kilitli atlandi)"
 Write-Host ""
 
 # [05] ICON CACHE
@@ -128,22 +128,28 @@ try {
 } catch { Write-Host "$PAD_SUB $Y[PARTIAL]$W" }
 Write-Host ""
 
-# [07] WINGET (Purple-Yellow Palette)
+# [07] UYGULAMA GUNCELLEMELERI (WINGET - Smart Telemetry)
 Write-Host "  $P$PAD_TXT[07]$W $C SISTEM UYGULAMALARI GUNCELLEME (WINGET)$W"
 if (Get-Command winget -ErrorAction SilentlyContinue) {
-    Write-Host "$PAD_SUB Mevcut guncellemeler denetleniyor..."
+    Write-Host "$PAD_SUB Guncellemeler denetleniyor..."
     $updateList = winget upgrade --accept-source-agreements | Out-String
     if ($updateList -match "No installed package found") {
         Write-Host "$PAD_SUB $G[DONE]$W Tum uygulamalar zaten guncel."
     } else {
+        # Canli uygulama takibi ve renkli yuzde motoru
+        $currentApp = "Sistem"
         winget upgrade --all --silent --accept-package-agreements --accept-source-agreements | ForEach-Object {
             $line = $_.Trim()
+            # Uygulama ismini yakala
             if ($line -match "^([\w\.\-]+)\s+.*$") { $currentApp = $matches[1] }
+            
+            # Yuzdelik ilerlemeyi yakala ve ayni satirda guncelle
             if ($line -match "(\d+%)") {
-                Write-Host -NoNewline "`r$PAD_SUB $P$currentApp$W guncelleniyor... $Y$($matches[1])$W"
+                Write-Host -NoNewline "`r$PAD_SUB $P$currentApp$W being updated $Y$($matches[1])$W"
             }
+            # Basari mesajini yakala ve isimle beraber Done bas
             elseif ($line -match "Successfully installed") {
-                Write-Host "`n$PAD_SUB $P$currentApp$W %100 $G[DONE]$W"
+                Write-Host "`n$PAD_SUB $P$currentApp$W Successfully Updated $G[DONE]$W"
             }
         }
     }
