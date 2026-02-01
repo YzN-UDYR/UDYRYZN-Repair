@@ -62,7 +62,7 @@ Write-Host "  $P$PAD_TXT[01]$W $C AG KATMANI DERIN SIFIRLAMA$W"
 $netOps = @(
     @{ cmd = "netsh winsock reset"; desc = "Winsock Protokolü Sifirlama........." },
     @{ cmd = "netsh int ip reset";  desc = "IP Yapilandirmasi Sifirlama........." },
-    @{ cmd = "ipconfig /release";   desc = "IP Adresi Birakma.................." },
+    @{ cmd = "ipconfig /release";   desc = "IP Adresi Birakma..................." },
     @{ cmd = "ipconfig /renew";     desc = "Yeni IP Adresi Aliniyor............." },
     @{ cmd = "ipconfig /flushdns";  desc = "DNS Onbelleği Temizleniyor.........." }
 )
@@ -152,3 +152,4 @@ Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
 Read-Host "Pencereyi kapatmak için Enter'a basınız..."
+
