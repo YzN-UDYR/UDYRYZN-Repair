@@ -11,7 +11,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
 # 3. YAPILANDIRMA (v12.6 - Mühürlü Sürüm)
-$CURRENT_VER = "12.6" 
+$CURRENT_VER = "12.8" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
 
@@ -151,3 +151,4 @@ Write-Host "  $G                                OPERASYON TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
 Read-Host "Pencereyi kapatmak için Enter'a basınız..."
+
