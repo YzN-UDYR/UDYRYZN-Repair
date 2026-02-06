@@ -1,55 +1,41 @@
-**UDYRYZN DEEP REPAIR ENGINE v11.0 🚀**
-Windows sistem hatalarını onarmak, ağ katmanlarını sıfırlamak ve gereksiz sistem yüklerini temizlemek için tasarlanmış, PowerShell tabanlı profesyonel bir bakım otomasyonudur.
+**UDYRYZN DEEP REPAIR v12.9 🚀**
+Tam Otomatik Windows Onarım ve Uygulama Güncelleme Sistemi
+
+Bu yazılım, Windows sistem hatalarını onarmak, ağ bağlantılarını tazelemek ve tüm yüklü uygulamalarınızı tek bir hamleyle güncellemek için tasarlanmış profesyonel bir otomasyondur.
 
 **🛠 Temel Özellikler**
-[01] Ağ Katmanı Sıfırlama: Winsock, IP yığını sıfırlama ve DNS temizliği (FlushDNS).
+[01] Ağ Katmanı Sıfırlama: Winsock, IP yığını ve DNS (FlushDNS) adımları tek tek raporlanarak temizlenir.
 
-[02] SFC Onarımı: Windows sistem çekirdeği bütünlük taraması.
+[02] SFC Onarımı: Windows sistem çekirdeği hataları gerçek zamanlı yüzde takibiyle taranır.
 
-[03] DISM Derin Onarım: RestoreHealth ve ResetBase ile bileşen deposu restorasyonu.
+[03] DISM Derin Onarım: Sistem imajı onarılır ve bileşen deposu (ResetBase) temizlenir.
 
-[04] Event Log Temizliği: Şişmiş sistem ve uygulama günlüklerinin milisaniyeler içinde silinmesi.
+[04] Event Log Temizliği: Şişmiş sistem günlükleri silinerek raporlanır.
 
-[05] Icon Cache Restorasyonu: Bozulmuş ikon veritabanlarının Explorer resetlenerek yenilenmesi.
+[05] Icon Cache Restorasyonu: Bozuk ikon veritabanları Explorer resetlenerek yenilenir.
 
-[06] USB Autoplay Aktivasyonu: Kayıt defteri üzerinden USB otomatik kullan kilidinin kaldırılması.
+[06] USB Autoplay Aktivasyonu: USB otomatik kullan kilidi kayıt defteri üzerinden kaldırılır.
 
-
-**🚀 Kurulum ve Çalıştırma**
-1. Dosyayı İndirin
-**UDYRYZN_DEEP_REPAIR.ps1** dosyasını bilgisayarınıza indirin.
-
-2. Yönetici Olarak Çalıştırın
-Dosyaya Sağ Tıklayın ve "PowerShell ile Çalıştır" (Run with PowerShell) seçeneğini seçin. Yazılım, yönetici izni yoksa otomatik olarak izin isteyecektir.
+[07] Winget Uygulama Güncelleme: Uygulama isimleri (Java, Chrome vb.) ve ilerleme yüzdeleri mor/sarı renklerle canlı izlenir.
 
 
+**⚠️ ÖNEMLİ: Script Çalışmıyorsa**
+Windows güvenlik politikaları dışarıdan indirilen scriptleri engelleyebilir. Eğer hata alıyorsanız şu adımı uygulayın:
 
-**🆘 Sorun Giderme (Sıkça Sorulan Sorular)**
-_🔴 "Script Çalıştırma Yasak" Hatası Alıyorum?_
-Windows, varsayılan olarak dışarıdan indirilen PowerShell scriptlerinin çalışmasını engeller. Bu engeli aşmak için şu adımları izleyin:
+PowerShell'i "Yönetici Olarak Çalıştır" deyin.
 
-Başlat menüsüne PowerShell yazın.
-
-Sağ tıklayıp "Yönetici Olarak Çalıştır" deyin.
-
-Açılan ekrana şu komutu yapıştırın ve Enter'a basın: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-
-Artık yazılımı sorunsuz çalıştırabilirsiniz.
+Şu komutu yapıştırıp Enter'a basın: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 
-_🟠 Ekranda "â" Gibi Garip Karakterler Var?_
-Bu bir karakter kodlama (encoding) hatasıdır. Yazılım v11.0 ile bu sorunu otomatik çözmeye çalışır. Yine de sorun yaşarsanız:
+**🚀 Nasıl Kullanılır?**
+UDYRYZN_DEEP_REPAIR.ps1 dosyasına sağ tıklayın.
 
-Dosyayı Visual Studio Code ile açın.
+"PowerShell ile Çalıştır" (Run with PowerShell) seçeneğini seçin.
 
-Sağ alttaki kodlama kısmından "Save with Encoding" seçeneğini seçip "UTF-8 with BOM" olarak kaydedin.
-
-
-_🟡 Güncelleme Döngüsünde Kalıyor?_
-Yazılım her açılışta GitHub üzerinden versiyon kontrolü yapar. Eğer sürekli "Güncellensin mi?" diye soruyorsa, indirdiğiniz dosyanın içindeki sürüm numarası ile GitHub'daki version.txt dosyasındaki rakam uyuşmuyor demektir. Lütfen GitHub'daki en güncel .ps1 dosyasını manuel olarak indirin.
+Ekrana gelen canlı telemetri verilerini izleyin; sistem operasyon bitene kadar kapanmayacaktır.
 
 
 **📡 Akıllı Güncelleme Sistemi**
-Yazılım, her açılışta güvenli TLS 1.2 protokolü ve Mozilla User-Agent kimliği ile GitHub'a bağlanır. Yeni bir sürüm tespit edildiğinde sizi uyarır ve tek bir tuşla kendi kodunu otomatik olarak günceller.
+Yazılım her açılışta GitHub üzerinden versiyon kontrolü yapar. Yeni bir sürüm tespit edildiğinde tek onayınızla kendi kodunu indirir, mühürler ve otomatik olarak yeniden başlar.
 
-**NOT: Bu araç sistem üzerinde derin onarımlar yaptığı için işlem sırasında internet kesilebilir veya Windows Gezgini (Explorer) kapanıp açılabilir. Lütfen operasyon bitene kadar pencereyi kapatmayın.**
+NOT: İşlem sırasında internet kısa süreli kesilebilir veya Windows Gezgini kapanıp açılabilir. Bu normal bir süreçtir.
