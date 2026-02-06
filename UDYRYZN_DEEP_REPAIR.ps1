@@ -25,18 +25,89 @@ $PAD_SUB  = "               " # 15 Karakterlik hassas mühür.
 $Host.UI.RawUI.WindowTitle = "UDYRYZN DEEP REPAIR v$CURRENT_VER"
 Clear-Host
 
-# 4. OTONOM GUNCELLEME MOTORU (Senin Sabit Lojigin)
+# 4. OTONOM GUNCELLEME MOTORU (Profesyonel Görünüm)
 try {
     $RAW_DATA = Invoke-RestMethod -Uri $URL_VERSION -UserAgent $UA -TimeoutSec 5 -UseBasicParsing
     $ONLINE_VER = ([string]$RAW_DATA).Trim() 
 
     if ([decimal]$ONLINE_VER -gt [decimal]$CURRENT_VER) {
-        Write-Host "  $G[!] YENI SURUM TESPIT EDILDI: v$ONLINE_VER$W"
-        if ((Read-Host "  Otomatik guncellensin mi? (E/H)") -eq "E") {
+        Clear-Host
+        Write-Host ""
+        Write-Host ""
+        Write-Host "  $Y╔═══════════════════════════════════════════════════════════════════════════════════╗$W"
+        Write-Host "  $Y║$W                                                                                   $Y║$W"
+        Write-Host "  $Y║$W            $W▄▄▄        $G██╗   ██╗██████╗ ██████╗  █████╗ ████████╗███████╗$W         $Y║$W"
+        Write-Host "  $Y║$W           $W█$C▀▀▀$W█       $G██║   ██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██╔════╝$W         $Y║$W"
+        Write-Host "  $Y║$W          $W█$R▄█$W▓$R█▄$W█      $G██║   ██║██████╔╝██║  ██║███████║   ██║   █████╗$W           $Y║$W"
+        Write-Host "  $Y║$W          $W███$R█$B▓$R█$W███      $G██║   ██║██╔═══╝ ██║  ██║██╔══██║   ██║   ██╔══╝$W           $Y║$W"
+        Write-Host "  $Y║$W          $W▀█$R███$W█▀      $G╚██████╔╝██║     ██████╔╝██║  ██║   ██║   ███████╗$W         $Y║$W"
+        Write-Host "  $Y║$W           $W█$R███$W█       $G ╚═════╝ ╚═╝     ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝$W         $Y║$W"
+        Write-Host "  $Y║$W           $R█$W▓▓▓$R█       $C⚡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━⚡$W             $Y║$W"
+        Write-Host "  $Y║$W          $R▐$W█████$R▌                                                            $Y║$W"
+        Write-Host "  $Y║$W          $R▐$Y█$R▓$Y█$R▓$Y█$R▌      $C⬆️  YENİ SURUM TESPİT EDİLDİ!  ⬆️$W                    $Y║$W"
+        Write-Host "  $Y║$W           $Y█$R▓$Y█$R▓$Y█                                                              $Y║$W"
+        Write-Host "  $Y║$W          $Y▐$R█$Y▓$R█$Y▓$R█$Y▌                                                            $Y║$W"
+        Write-Host "  $Y║$W          $R▐$Y█$R▓$Y███$R▓$Y█$R▌                                                           $Y║$W"
+        Write-Host "  $Y║$W           $Y▀$R█$Y███$R█$Y▀                                                             $Y║$W"
+        Write-Host "  $Y║$W            $R▀$Y███$R▀                                                              $Y║$W"
+        Write-Host "  $Y║$W             $Y▀$R█$Y▀                                                               $Y║$W"
+        Write-Host "  $Y║$W              $R[MEVCUT SURUM]$W  :  $W v$CURRENT_VER$W                                       $Y║$W"
+        Write-Host "  $Y║$W              $G[YENI SURUM]$W     :  $G v$ONLINE_VER$W                                       $Y║$W"
+        Write-Host "  $Y║$W                                                                                   $Y║$W"
+        Write-Host "  $Y║$W              Yeni surum gelismis ozellikler ve hata duzeltmeleri iceriyor.       $Y║$W"
+        Write-Host "  $Y║$W                                                                                   $Y║$W"
+        Write-Host "  $Y╠═══════════════════════════════════════════════════════════════════════════════════╣$W"
+        Write-Host "  $Y║$W                                                                                   $Y║$W"
+        Write-Host "  $Y║$W              $G[E]$W - Evet, Simdi Guncelle        $R[H]$W - Hayir, Atla               $Y║$W"
+        Write-Host "  $Y║$W                                                                                   $Y║$W"
+        Write-Host "  $Y╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
+        Write-Host ""
+        Write-Host -NoNewline "  $C►$W Seciminiz: "
+        
+        $choice = Read-Host
+        
+        if ($choice -eq "E" -or $choice -eq "e") {
+            Write-Host ""
+            Write-Host "  $Y╔═══════════════════════════════════════════════════════════════════════════════════╗$W"
+            Write-Host "  $Y║$W                        $C⚙️  GUNCELLEME BASLATILIYOR...$W                            $Y║$W"
+            Write-Host "  $Y╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
+            Write-Host ""
+            Write-Host -NoNewline "  $PAD_SUB Yeni surum indiriliyor"
+            
+            # İndirme animasyonu
+            for ($i = 0; $i -lt 8; $i++) {
+                Write-Host -NoNewline "."
+                Start-Sleep -Milliseconds 200
+            }
+            
             $newCode = (Invoke-WebRequest -Uri $URL_SCRIPT -UserAgent $UA -UseBasicParsing).Content
+            Write-Host " $G[DONE]$W"
+            
+            Write-Host -NoNewline "  $PAD_SUB Dosya kaydediliyor"
+            for ($i = 0; $i -lt 4; $i++) {
+                Write-Host -NoNewline "."
+                Start-Sleep -Milliseconds 150
+            }
             [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
+            Write-Host " $G[DONE]$W"
+            
+            Write-Host -NoNewline "  $PAD_SUB Yeni surum baslatiliyor"
+            for ($i = 0; $i -lt 4; $i++) {
+                Write-Host -NoNewline "."
+                Start-Sleep -Milliseconds 150
+            }
+            Write-Host " $G[OK]$W"
+            Write-Host ""
+            Write-Host "  $G✓ Guncelleme tamamlandi! Yeni pencere aciliyor...$W"
+            Write-Host ""
+            Start-Sleep -Seconds 2
+            
             Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
             exit
+        } else {
+            Write-Host ""
+            Write-Host "  $Y⚠ Guncelleme atlandi. Mevcut surum ile devam ediliyor...$W"
+            Start-Sleep -Seconds 2
         }
     }
 } catch { }
