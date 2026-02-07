@@ -399,12 +399,12 @@ Write-Host ""
 
 # ÖNERİ 4: ÖZET TABLOSU
 Write-Host "  $B╔═══════════════════════════════════════════════════════════════════════════════════╗$W"
-Write-Host "  $B║$W                             $Y📈 OPERASYON ÖZETİ$W                                   $B║$W"
+Write-Host "  $B║$W                             $Y📈 OPERASYON ÖZETİ$W                                    $B║$W"
 Write-Host "  $B╠═══════════════════════════════════════════════════════════════════════════════════╣$W"
 Write-Host "  $B║$W                                                                                   $B║$W"
-Write-Host "  $B║$W                 $G✅ BAŞARILI İŞLEMLER$W    : $G$script:SuccessCount$W                                   $B║$W"
-Write-Host "  $B║$W                 $Y⚠️  KISMİ BAŞARILI$W      : $Y$script:PartialCount$W                                   $B║$W"
-Write-Host "  $B║$W                 $R❌ BAŞARISIZ$W            : $R$script:FailCount$W                                   $B║$W"
+Write-Host "  $B║$W                 $G✅ BAŞARILI İŞLEMLER$W    : $G$script:SuccessCount$W                                      $B║$W"
+Write-Host "  $B║$W                 $Y⚠️  KISMİ BAŞARILI$W      : $Y$script:PartialCount$W                                       $B║$W"
+Write-Host "  $B║$W                 $R❌ BAŞARISIZ$W            : $R$script:FailCount$W                                       $B║$W"
 Write-Host "  $B║$W                                                                                   $B║$W"
 
 # ÖNERİ 5: TOPLAM SÜRE
@@ -414,16 +414,16 @@ $Minutes = [math]::Floor($Duration / 60)
 $Seconds = [math]::Round($Duration % 60, 1)
 
 if ($Minutes -gt 0) {
-    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Minutes dakika $Seconds saniye$W                $B║$W"
+    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Minutes dakika $Seconds saniye$W                   $B║$W"
 } else {
-    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Seconds saniye$W                            $B║$W"
+    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Seconds saniye$W                              $B║$W"
 }
 
 Write-Host "  $B║$W                                                                                   $B║$W"
 Write-Host "  $B╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
 
 Write-Host ""
-Write-Host "  $B$PAD_BOX" + ("═" * 80)
+Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host "  $G                           TUM OPERASYONLAR TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
