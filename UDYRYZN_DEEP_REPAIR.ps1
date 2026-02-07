@@ -1,4 +1,4 @@
-# 1. YONETICI KONTROLU (Admin Privileges)
+\xEF\xBB\xBF# 1. YONETICI KONTROLU (Admin Privileges)
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
@@ -10,10 +10,16 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 
-# 3. YAPILANDIRMA (v12.8 - Geliştirilmiş Telemetri)
-$CURRENT_VER = "12.9" 
+# 3. YAPILANDIRMA (v13.0 - Gelişmiş Raporlama ve Güvenlik)
+$CURRENT_VER = "13.0" 
 $URL_VERSION = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/version.txt"
 $URL_SCRIPT  = "https://raw.githubusercontent.com/YzN-UDYR/UDYRYZN-Repair/main/UDYRYZN_DEEP_REPAIR.ps1"
+
+# Başlangıç zamanı ve başarı sayaçları (ÖNERİ 5)
+$StartTime = Get-Date
+$script:SuccessCount = 0
+$script:PartialCount = 0
+$script:FailCount = 0
 
 $ESC = [char]27
 $G = "$ESC[92m"; $B = "$ESC[94m"; $C = "$ESC[96m"; $R = "$ESC[91m"; $W = "$ESC[0m"; $Y = "$ESC[93m"; $P = "$ESC[95m"
@@ -72,6 +78,17 @@ try {
             Write-Host "  $Y║$W                        $C⚙️  GUNCELLEME BASLATILIYOR...$W                            $Y║$W"
             Write-Host "  $Y╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
             Write-Host ""
+            
+            # ÖNERİ 3: Yedek oluştur (Rollback için)
+            Write-Host -NoNewline "  $PAD_SUB Yedek olusturuluyor"
+            $BackupPath = "$env:TEMP\UDYRYZN_Backup_$(Get-Date -Format 'yyyyMMdd_HHmmss').ps1"
+            try {
+                Copy-Item $PSCommandPath $BackupPath -Force
+                Write-Host " $G[DONE]$W"
+            } catch {
+                Write-Host " $Y[SKIP]$W"
+            }
+            
             Write-Host -NoNewline "  $PAD_SUB Yeni surum indiriliyor"
             
             # İndirme animasyonu
@@ -88,8 +105,21 @@ try {
                 Write-Host -NoNewline "."
                 Start-Sleep -Milliseconds 150
             }
-            [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
-            Write-Host " $G[DONE]$W"
+            
+            # ÖNERİ 3: Rollback mekanizması
+            try {
+                [System.IO.File]::WriteAllText($PSCommandPath, $newCode, [System.Text.Encoding]::UTF8)
+                Write-Host " $G[DONE]$W"
+            } catch {
+                Write-Host " $R[FAIL]$W"
+                Write-Host "  $Y⚠ Hata! Eski surum geri yukleniyor...$W"
+                if (Test-Path $BackupPath) {
+                    Copy-Item $BackupPath $PSCommandPath -Force
+                    Write-Host "  $G✓ Eski surum geri yuklendi.$W"
+                }
+                Start-Sleep -Seconds 3
+                return
+            }
             
             Write-Host -NoNewline "  $PAD_SUB Yeni surum baslatiliyor"
             for ($i = 0; $i -lt 4; $i++) {
@@ -153,7 +183,14 @@ $netOps = @(
 )
 foreach ($op in $netOps) {
     Write-Host -NoNewline "$PAD_SUB $($op.desc)"
-    try { Invoke-Expression $op.cmd | Out-Null; Write-Host " $G[DONE]$W" } catch { Write-Host " $R[FAIL]$W" }
+    try { 
+        Invoke-Expression $op.cmd | Out-Null
+        Write-Host " $G[DONE]$W"
+        $script:SuccessCount++
+    } catch { 
+        Write-Host " $R[FAIL]$W"
+        $script:FailCount++
+    }
 }
 Write-Host ""
 
@@ -190,6 +227,7 @@ $null = Receive-Job $sfcJob
 Remove-Job $sfcJob -Force
 
 Write-Host "`r$PAD_SUB SFC Taramasi: $G 100% $W $G[DONE]$W                    "
+$script:SuccessCount++
 Write-Host ""
 
 # [03] DISM (Real-Time Yüzde - Geliştirilmiş)
@@ -212,6 +250,7 @@ Write-Host "`r$PAD_SUB Onarim Durumu: $G 100.0% $W $G[DONE]$W                   
 Write-Host "$PAD_SUB Bilesen deposu temizleniyor (ResetBase)..."
 dism /online /cleanup-image /startcomponentcleanup /resetbase | Out-Null
 Write-Host "$PAD_SUB Bilesen deposu temizlendi $G[DONE]$W"
+$script:SuccessCount++
 Write-Host ""
 
 # [04] EVENT LOGS (Gerçek Zamanlı Sayaç)
@@ -235,6 +274,7 @@ foreach ($Log in $Logs) {
     }
 }
 Write-Host "`r$PAD_SUB Temizlenen: $G$s/$totalLogs$W (Kilitli: $Y$k$W) $G[DONE]$W     "
+$script:SuccessCount++
 Write-Host ""
 
 # [05] ICON CACHE (Geliştirilmiş Hata Yönetimi)
@@ -260,10 +300,12 @@ try {
     Start-Process explorer
     Start-Sleep -Milliseconds 500
     Write-Host "`r$PAD_SUB Explorer baslatildi $G[DONE]$W               "
+    $script:SuccessCount++
     
 } catch { 
     Write-Host "`r$PAD_SUB Hata olustu, Explorer yeniden baslatiliyor... $Y[PARTIAL]$W"
     Start-Process explorer -ErrorAction SilentlyContinue
+    $script:PartialCount++
 }
 Write-Host ""
 
@@ -273,8 +315,10 @@ Write-Host "  $P$PAD_TXT[06]$W $C USB AUTOPLAY AKTIVASYONU$W"
 try {
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers" -Name "DisableAutoplay" -Value 0 -Force
     Write-Host "$PAD_SUB USB Autoplay aktif edildi $G[DONE]$W"
+    $script:SuccessCount++
 } catch { 
-    Write-Host "$PAD_SUB Kayit defteri erisim hatasi $Y[PARTIAL]$W" 
+    Write-Host "$PAD_SUB Kayit defteri erisim hatasi $Y[PARTIAL]$W"
+    $script:PartialCount++
 }
 Write-Host ""
 
@@ -318,19 +362,79 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
     # Eğer hiç güncelleme yapılmadıysa
     if (-not $updateStarted) {
         Write-Host "$PAD_SUB Tum uygulamalar guncel $G[DONE]$W"
+        $script:SuccessCount++
     }
     
 } else { 
-    Write-Host "$PAD_SUB Winget bulunamadi $R[FAIL]$W" 
+    Write-Host "$PAD_SUB Winget bulunamadi $R[FAIL]$W"
+    $script:FailCount++
 }
 Write-Host ""
 
 # KAPANIS - Tam İlerleme
 Show-Progress 7
+
+# ÖNERİ 2: SİSTEM BİLGİLERİ
+Write-Host ""
+Write-Host "  $C╔═══════════════════════════════════════════════════════════════════════════════════╗$W"
+Write-Host "  $C║$W                              $Y📊 SİSTEM RAPORU$W                                     $C║$W"
+Write-Host "  $C╠═══════════════════════════════════════════════════════════════════════════════════╣$W"
+
+try {
+    $OS = (Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue).Caption
+    $Build = (Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue).BuildNumber
+    $RAM = [math]::Round((Get-CimInstance Win32_ComputerSystem -ErrorAction SilentlyContinue).TotalPhysicalMemory / 1GB, 2)
+    $Disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'" -ErrorAction SilentlyContinue | 
+            Select-Object @{Name="FreeGB";Expression={[math]::Round($_.FreeSpace / 1GB, 2)}}
+    
+    Write-Host "  $C║$W  İşletim Sistemi  : $W$OS (Build $Build)$W"
+    Write-Host "  $C║$W  Toplam RAM       : $W$RAM GB$W"
+    Write-Host "  $C║$W  C: Boş Alan      : $W$($Disk.FreeGB) GB$W"
+} catch {
+    Write-Host "  $C║$W  Sistem bilgisi alinamadi.$W"
+}
+
+Write-Host "  $C╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
+Write-Host ""
+
+# ÖNERİ 4: ÖZET TABLOSU
+Write-Host "  $B╔═══════════════════════════════════════════════════════════════════════════════════╗$W"
+Write-Host "  $B║$W                             $Y📈 OPERASYON ÖZETİ$W                                   $B║$W"
+Write-Host "  $B╠═══════════════════════════════════════════════════════════════════════════════════╣$W"
+Write-Host "  $B║$W                                                                                   $B║$W"
+Write-Host "  $B║$W                 $G✅ BAŞARILI İŞLEMLER$W    : $G$script:SuccessCount$W                                   $B║$W"
+Write-Host "  $B║$W                 $Y⚠️  KISMİ BAŞARILI$W      : $Y$script:PartialCount$W                                   $B║$W"
+Write-Host "  $B║$W                 $R❌ BAŞARISIZ$W            : $R$script:FailCount$W                                   $B║$W"
+Write-Host "  $B║$W                                                                                   $B║$W"
+
+# ÖNERİ 5: TOPLAM SÜRE
+$EndTime = Get-Date
+$Duration = ($EndTime - $StartTime).TotalSeconds
+$Minutes = [math]::Floor($Duration / 60)
+$Seconds = [math]::Round($Duration % 60, 1)
+
+if ($Minutes -gt 0) {
+    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Minutes dakika $Seconds saniye$W                $B║$W"
+} else {
+    Write-Host "  $B║$W                 $C⏱️  Toplam Süre$W          : $C$Seconds saniye$W                            $B║$W"
+}
+
+Write-Host "  $B║$W                                                                                   $B║$W"
+Write-Host "  $B╚═══════════════════════════════════════════════════════════════════════════════════╝$W"
+
 Write-Host ""
 Write-Host "  $B$PAD_BOX" + ("═" * 80)
 Write-Host "  $G                           TUM OPERASYONLAR TAMAMLANDI."
 Write-Host "  $B$PAD_BOX" + ("═" * 80) + "$W"
 Write-Host ""
-Read-Host "Pencereyi kapatmak için Enter'a basınız..."
 
+# ÖNERİ 6: SES BİLDİRİMİ
+try {
+    [console]::beep(800, 150)
+    Start-Sleep -Milliseconds 100
+    [console]::beep(1000, 150)
+    Start-Sleep -Milliseconds 100
+    [console]::beep(1200, 200)
+} catch { }
+
+Read-Host "Pencereyi kapatmak için Enter'a basınız..."
